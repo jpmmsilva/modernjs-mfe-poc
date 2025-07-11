@@ -1,0 +1,15 @@
+import { defineRuntimeConfig } from '@modern-js/runtime';
+
+export default defineRuntimeConfig({
+  masterApp: {
+    apps: [{
+      name: 'Table',
+      entry: 'http://localhost:8081',
+      // activeWhen: '/table'
+    }, {
+      name: 'Dashboard',
+      entry: 'http://localhost:8082'
+      // activeWhen: '/dashboard'
+    }]
+  },
+});
