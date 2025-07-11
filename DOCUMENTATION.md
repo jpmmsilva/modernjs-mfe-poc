@@ -2,21 +2,20 @@
 
 ## Overview
 
-This project demonstrates a micro-frontend architecture using Modern.js with Garfish for module federation. The project consists of three applications:
+This project demonstrates a micro-frontend architecture using Modern.js with Module Federation. The project consists of two applications:
 
 1. **Host Application** (`host-filebased`) - The main application that loads and orchestrates micro-frontends
-2. **Dashboard Remote** (`dashboard-remote`) - A file-based routing micro-frontend
-3. **Table Remote** (`table-remote`) - A self-controlled routing micro-frontend
+2. **React Remote** (`react-remote`) - A webpack-based micro-frontend with multiple exposed components
 
 ## Architecture
 
 ### Technology Stack
 
 - **Framework**: Modern.js 2.68.2
-- **Micro-frontend Solution**: Garfish Plugin
+- **Micro-frontend Solution**: Module Federation
 - **Bundler**: Rspack (configurable to Webpack)
-- **Language**: TypeScript
-- **Package Manager**: pnpm (host and table-remote), yarn (dashboard-remote)
+- **Language**: TypeScript (host), JavaScript (remote)
+- **Package Manager**: pnpm (host), yarn (remote)
 - **Linting**: Biome
 - **Git Hooks**: simple-git-hooks with lint-staged
 
@@ -29,18 +28,22 @@ poc-modernjs/
 │   │   ├── routes/
 │   │   │   ├── layout.tsx   # Main layout with navigation
 │   │   │   ├── page.tsx     # Home page
-│   │   │   ├── dashboard/
-│   │   │   │   └── $.tsx    # Dashboard micro-frontend loader
-│   │   │   └── table/
-│   │   │       └── $.tsx    # Table micro-frontend loader
-│   │   └── modern.runtime.ts # Runtime configuration
-├── dashboard-remote/         # Dashboard micro-frontend
-│   └── src/
-│       └── routes/
-│           └── page.tsx     # Dashboard component
-└── table-remote/            # Table micro-frontend
-    └── src/
-        └── App.tsx          # Self-controlled routing app
+│   │   │   └── react-remote/
+│   │   │       └── $.tsx    # React remote micro-frontend loader
+│   │   └── modern-app-env.d.ts # TypeScript declarations
+│   ├── modern.config.ts     # Modern.js configuration
+│   └── module-federation.config.ts # Module Federation configuration
+└── react-remote/            # React micro-frontend
+    ├── src/
+    │   ├── App.js           # Main app component
+    │   ├── Button.js        # Exposed button component
+    │   ├── VueComponent.js  # Vue component wrapper
+    │   ├── VueComponent.vue # Vue component
+    │   ├── SolidComponent.solid.jsx # Solid.js component
+    │   └── ...              # Other exposed components
+    ├── webpack.config.js    # Webpack configuration
+    └── public/
+        └── index.html       # HTML template
 ```
 
 ## Applications
@@ -50,64 +53,65 @@ poc-modernjs/
 **Purpose**: Main application that serves as the container for micro-frontends.
 
 **Key Features**:
-- Uses Garfish plugin for micro-frontend orchestration
+- Uses Module Federation for micro-frontend orchestration
 - Implements file-based routing with React Router
-- Provides navigation between different micro-frontends
-- Configures remote applications in runtime configuration
+- Provides navigation to the react-remote micro-frontend
+- Configures remote applications in module federation configuration
 
 **Configuration**:
 - **Port**: Default Modern.js port (likely 8080)
 - **Bundler**: Rspack (configurable to Webpack)
 - **Runtime**: Router enabled
 
-**Remote Apps Configuration**:
+**Module Federation Configuration**:
 ```typescript
-masterApp: {
-  apps: [{
-    name: 'Table',
-    entry: 'http://localhost:8081',
-  }, {
-    name: 'Dashboard',
-    entry: 'http://localhost:8082'
-  }]
-}
+export default createModuleFederationConfig({
+  name: 'host',
+  remotes: {
+    remote: 'reactRemote@http://localhost:63640/remoteEntry.js',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.3.1' },
+    'react-dom': { singleton: true, requiredVersion: '^18.3.1' },
+  },
+});
 ```
 
-### 2. Dashboard Remote (`dashboard-remote`)
+### 2. React Remote (`react-remote`)
 
-**Purpose**: File-based routing micro-frontend for dashboard functionality.
+**Purpose**: Webpack-based micro-frontend with multiple exposed components.
 
 **Key Features**:
-- Uses Modern.js file-based routing
-- Simple component-based architecture
-- Integrated with host application via Garfish
+- Uses Webpack Module Federation
+- Exposes multiple components (React, Vue, Solid.js)
+- Runs on port 63640
+- Supports multiple frameworks and component types
+
+**Exposed Components**:
+- `./Button` - React button component
+- `./VueComponent` - Vue component wrapper
+- `./UnwrappedVueComponent` - Direct Vue component
+- `./SolidComponent` - Solid.js component
+- `./ComponentError` - Error boundary component
+- `./DelayedComponent` - Async loading component
+- `./PlainJavascriptComponent` - Plain JavaScript component
+- `./ShadowStyleComponent` - Component with shadow DOM styles
+- `./DestructiveStyleComponent` - Component with conflicting styles
+- `./ReactVersionComponent` - React version display
+- `./ForwardRefComponent` - Forward ref component
 
 **Configuration**:
-- **Port**: 8082
-- **Routing**: File-based (Modern.js default)
+- **Port**: 63640
+- **Bundler**: Webpack with Module Federation
 - **Package Manager**: Yarn
-
-### 3. Table Remote (`table-remote`)
-
-**Purpose**: Self-controlled routing micro-frontend for table functionality.
-
-**Key Features**:
-- Implements self-controlled routing with React Router
-- Accepts `basename` prop for proper routing integration
-- More complex routing structure with sub-routes
-
-**Configuration**:
-- **Port**: 8081
-- **Routing**: Self-controlled with BrowserRouter
-- **Package Manager**: pnpm
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js >= 16.18.1
-- pnpm (for host and table-remote)
-- yarn (for dashboard-remote)
+- pnpm (for host application)
+- yarn (for react-remote)
 
 ### Installation
 
@@ -117,46 +121,33 @@ masterApp: {
    pnpm install
    ```
 
-2. **Install Dashboard Remote**:
+2. **Install React Remote**:
    ```bash
-   cd dashboard-remote
+   cd react-remote
    yarn install
-   ```
-
-3. **Install Table Remote**:
-   ```bash
-   cd table-remote
-   pnpm install
    ```
 
 ### Development
 
-1. **Start Dashboard Remote** (Port 8082):
+1. **Start React Remote** (Port 63640):
    ```bash
-   cd dashboard-remote
-   yarn dev
+   cd react-remote
+   yarn start
    ```
 
-2. **Start Table Remote** (Port 8081):
-   ```bash
-   cd table-remote
-   pnpm dev
-   ```
-
-3. **Start Host Application** (Port 8080):
+2. **Start Host Application** (Port 8080):
    ```bash
    cd host-filebased
    pnpm dev
    ```
 
-4. **Access the Application**:
+3. **Access the Application**:
    - Open `http://localhost:8080` in your browser
-   - Navigate between micro-frontends using the provided links
+   - Navigate to `/react-remote` to see the micro-frontend
 
 ### Available Scripts
 
-All applications support the following scripts:
-
+**Host Application**:
 - `dev` - Start development server
 - `build` - Build for production
 - `start` - Start production server
@@ -165,6 +156,13 @@ All applications support the following scripts:
 - `new` - Add new features or entries
 - `upgrade` - Upgrade Modern.js dependencies
 
+**React Remote**:
+- `start` - Start development server
+- `build` - Build for production
+- `builddev` - Build for development
+- `serve` - Serve production build
+- `clean` - Clean dist directory
+
 ## Routing Architecture
 
 ### Host Application Routing
@@ -172,26 +170,17 @@ All applications support the following scripts:
 The host application uses file-based routing with the following structure:
 
 - `/` - Home page
-- `/dashboard` - Loads Dashboard micro-frontend
-- `/table` - Loads Table micro-frontend
+- `/react-remote` - Loads React Remote micro-frontend
 
 ### Micro-Frontend Integration
 
-#### File-Based Routing (Dashboard)
-- Uses Modern.js file-based routing
-- Automatically integrated with host routing
-- Simple component structure
-
-#### Self-Controlled Routing (Table)
-- Uses React Router with BrowserRouter
-- Accepts `basename` prop for proper integration
-- Supports sub-routes (`/path`)
+The react-remote application is loaded via Module Federation and provides multiple components that can be dynamically imported and used within the host application.
 
 ## Development Workflow
 
 ### Code Quality
 
-All applications use:
+The host application uses:
 - **Biome** for linting and formatting
 - **simple-git-hooks** for pre-commit hooks
 - **lint-staged** for staged file processing
@@ -206,21 +195,16 @@ All applications use:
 
 - **Development**: Hot module replacement enabled
 - **Production**: Optimized builds with Rspack
-- **Runtime**: Router and Garfish integration
+- **Runtime**: Router and Module Federation integration
 
 ## Deployment
 
 ### Build Process
 
-1. **Build Micro-Frontends**:
+1. **Build React Remote**:
    ```bash
-   # Dashboard
-   cd dashboard-remote
+   cd react-remote
    yarn build
-   
-   # Table
-   cd table-remote
-   pnpm build
    ```
 
 2. **Build Host Application**:
@@ -231,8 +215,8 @@ All applications use:
 
 ### Production Considerations
 
-- Ensure all micro-frontends are built and deployed
-- Update entry URLs in host configuration for production
+- Ensure react-remote is built and deployed
+- Update remote entry URL in host configuration for production
 - Configure proper CORS settings
 - Set up proper domain routing
 
@@ -240,15 +224,15 @@ All applications use:
 
 ### Common Issues
 
-1. **Port Conflicts**: Ensure ports 8080, 8081, and 8082 are available
-2. **Module Loading**: Check that all micro-frontends are running
-3. **Routing Issues**: Verify basename configuration for self-controlled routing
+1. **Port Conflicts**: Ensure ports 8080 and 63640 are available
+2. **Module Loading**: Check that react-remote is running
+3. **CORS Issues**: Verify CORS configuration in webpack dev server
 4. **Build Errors**: Ensure all dependencies are properly installed
 
 ### Debugging
 
 - Check browser console for module federation errors
-- Verify network requests to micro-frontend entries
+- Verify network requests to remote entry
 - Use Modern.js dev tools for debugging
 
 ## Best Practices
@@ -256,9 +240,9 @@ All applications use:
 ### Micro-Frontend Development
 
 1. **Isolation**: Keep micro-frontends as independent as possible
-2. **Shared Dependencies**: Use module federation for shared libraries
-3. **Routing**: Choose appropriate routing strategy (file-based vs self-controlled)
-4. **State Management**: Implement proper state isolation
+2. **Shared Dependencies**: Use Module Federation for shared libraries
+3. **Component Design**: Design components for reusability
+4. **Error Handling**: Implement proper error boundaries
 
 ### Host Application
 
@@ -287,7 +271,6 @@ All applications use:
 ## Resources
 
 - [Modern.js Documentation](https://modernjs.dev/en)
-- [Garfish Documentation](https://garfish.bytedance.com/)
 - [Module Federation Guide](https://webpack.js.org/concepts/module-federation/)
 - [React Router Documentation](https://reactrouter.com/)
 
@@ -295,6 +278,6 @@ All applications use:
 
 For issues and questions:
 1. Check the Modern.js documentation
-2. Review Garfish troubleshooting guide
+2. Review Module Federation troubleshooting guide
 3. Check browser console for detailed error messages
 4. Verify all applications are running on correct ports 
