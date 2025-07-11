@@ -1,5 +1,5 @@
 import { appTools, defineConfig } from '@modern-js/app-tools';
-import { garfishPlugin } from '@modern-js/plugin-garfish';
+import { moduleFederationPlugin } from '@module-federation/modern-js';
 
 // https://modernjs.dev/en/configure/app/usage
 export default defineConfig({
@@ -10,6 +10,6 @@ export default defineConfig({
     appTools({
       bundler: 'rspack', // Set to 'webpack' to enable webpack
     }),
-    garfishPlugin(),
+    moduleFederationPlugin()
   ],
 });

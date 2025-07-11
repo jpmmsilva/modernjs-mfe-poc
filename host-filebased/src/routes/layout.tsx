@@ -3,10 +3,7 @@ import { Outlet, Link } from '@modern-js/runtime/router';
 const Layout = () => (
   <div>
     <div>
-      <Link to={'/table'}>Load file-base routing sub-app</Link>
-    </div>
-    <div>
-      <Link to={'/dashboard'}>Load self-controlled routing sub-app</Link>
+      <Link to={'/react-remote'}>Load react-remote sub-app</Link>
     </div>
     <div>
       <Link to={'/'}>unmount sub-app</Link>
