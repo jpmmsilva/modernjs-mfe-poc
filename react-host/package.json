@@ -1,34 +1,29 @@
 {
-  "name": "@mfe-react/mfe",
+  "name": "@mfe-react/host",
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.17.8",
     "@babel/preset-react": "7.16.7",
-    "babel-preset-solid": "^1.4.0",
-    "@babel/plugin-transform-runtime": "^7.15.8",
-    "@babel/preset-env": "^7.15.8",
     "babel-loader": "8.2.4",
+    "css-loader": "^6.7.1",
     "html-webpack-plugin": "5.5.0",
-    "file-loader": "^6.2.0",
-    "vue-loader": "^17.0.0",
+    "style-loader": "^3.3.1",
     "webpack": "5.70.0",
-    "webpack-cli": "4.9.2",
-    "webpack-dev-server": "4.7.4",
-    "serve": "^14.2.1"
+    "webpack-cli": "^5.0.0",
+    "webpack-dev-server": "4.7.4"
   },
   "scripts": {
     "start": "webpack-cli serve",
     "build": "webpack --mode production",
-    "builddev": "webpack --mode development",
-    "serve": "serve dist -p 63640",
+    "serve": "serve dist -p 3001",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "solid-js": "^1.4.1",
-    "vue": "^3.2.33"
+    "react-shadow-root": "^6.2.0",
+    "serve": "^14.2.4"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb313e"
 }
